@@ -1,0 +1,83 @@
+services:
+  nginx:
+    depends_on:
+      - wordpress
+    build: ./requirements/nginx/
+    volumes:
+      - wp-files:/var/www/html/:ro
+    restart: always
+    ports:
+      - 443:443
+    networks:
+      - inception_net
+  mariadb:
+    build: ./requirements/mariadb/
+    volumes:
+      - db-data:/var/lib/mysql
+    restart: always
+    env_file: .env
+    networks:
+      - inception_net
+
+  wordpress:
+    depends_on:
+      - redis
+    build: ./requirements/wordpress
+    volumes:
+      - wp-files:/var/www/html/
+    restart: always
+    env_file: .env
+    networks:
+      - inception_net
+
+  redis:
+    networks:
+      - inception_net
+    depends_on:
+      - mariadb
+    env_file: .env
+    build: ./requirements/bonus/redis-cache
+
+  static:
+    networks:
+      - inception_net
+    depends_on:
+      - nginx
+    build: ./requirements/bonus/static
+
+  adminer:
+    networks:
+      - inception_net
+    depends_on:
+      - nginx
+    build: ./requirements/bonus/adminer
+
+  ftp:
+    networks:
+      - inception_net
+    ports:
+      - "21:21"
+    depends_on:
+      - wordpress
+    volumes:
+      - wp-files:/home/ftpuser/ftp
+    env_file: .env
+    
+
+networks:
+    inception_net:
+      driver: bridge
+
+volumes:
+    db-data:
+      driver: local
+      driver_opts:
+        type: none
+        device: ~/sait-alo/data/mariadb
+        o: bind
+    wp-files:
+      driver: local
+      driver_opts:
+        type: none
+        device: ~/sait-alo/data/wordpress
+        o: bind
