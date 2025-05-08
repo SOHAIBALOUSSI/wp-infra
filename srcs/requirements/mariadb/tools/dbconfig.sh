@@ -1,17 +1,18 @@
 #!/bin/sh
 
-if [ ! -d "/var/lib/mysql/mysql" ]; then
-    # Initialize MariaDB data directory
-    mysql_install_db --user=mysql --datadir=/var/lib/mysql
-
-    /usr/bin/mysqld --user=mysql --bootstrap << EOF
-    USE mysql;
-    FLUSH PRIVILEGES;
-    CREATE DATABASE IF NOT EXISTS wordpress;
-    CREATE USER IF NOT EXISTS 'sait-alo'@'%' IDENTIFIED BY 's1s2s3@sss';
-    GRANT ALL PRIVILEGES ON wordpress.* TO 'sait-alo'@'%';
-    FLUSH PRIVILEGES;
-EOF
+if [ -z "$(ls -A /var/lib/mysql)" ]; then
+    echo "Initializing MariaDB data directory..."
+    mysql_install_db --user=mysql --datadir=/var/lib/mysql  
+    echo "Creating user: ${DB_USER}"
+    mariadbd --user=mysql --bootstrap <<-EOSQL
+FLUSH PRIVILEGES;
+CREATE DATABASE IF NOT EXISTS wordpress;
+CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+GRANT ALL PRIVILEGES ON wordpress.* TO '${DB_USER}'@'%';
+FLUSH PRIVILEGES;
+EOSQL
+else
+    echo "MariaDB already initialized. Skipping bootstrap."
 fi
 
-exec /usr/bin/mysqld --user=mysql
+exec mariadbd --user=mysql

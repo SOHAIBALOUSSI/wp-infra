@@ -6,39 +6,31 @@ if [ ! -f wp-config.php ]; then
     tar -xzvf latest.tar.gz
     cp -R wordpress/* .
     rm -rf wordpress latest.tar.gz
-    rm -f wp-config-sample.php wp-config.php
-    
-    wp config create --dbhost="${DB_HOST}" \
-                        --dbname="${DB_NAME}" \
-                        --dbuser="${DB_USER}" \
-                        --dbpass="${DB_PASSWORD}" \
-                        --allow-root
-    
-    until wp db check --allow-root; do
+    wp config create --dbhost="${DB_HOST}" --dbname="${DB_NAME}" \
+                        --dbuser="${DB_USER}" --dbpass="${DB_PASSWORD}"
+    until wp db check ; do
         echo "Waiting for database..."
         sleep 1
     done
 
-    if ! wp core is-installed --allow-root; then
+    if ! wp core is-installed ; then
         wp core install \
             --url=${WP_URL} \
             --title="${WP_TITLE}" \
             --admin_user="${WP_ADMIN_USER}" \
             --admin_password="${WP_ADMIN_PASSWORD}" \
             --admin_email="${WP_ADMIN_EMAIL}" \
-            --skip-email \
-            --allow-root
+            --skip-email
+            
     fi
-    wp config set WP_REDIS_HOST redis --allow-root
-    wp config set WP_REDIS_PORT 6379 --allow-root
-    wp config set WP_CACHE 'true' --allow-root
-    wp config set WP_REDIS_DATABASE 0 --allow-root
-    sleep 2
-    wp plugin install redis-cache --activate --allow-root
-    wp redis enable --allow-root
+    wp config set WP_REDIS_HOST redis 
+    wp config set WP_REDIS_PORT 6379 
+    wp config set WP_CACHE 'true'
+    wp config set WP_REDIS_DATABASE 0 
+    sleep 1
+    wp plugin install redis-cache --activate 
+    wp redis enable 
 
 fi
 
-chown -R nobody:nobody /var/www/html
-
-exec "$@"
+exec php-fpm83 -F

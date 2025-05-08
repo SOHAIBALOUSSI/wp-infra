@@ -1,12 +1,7 @@
 FROM alpine:3.21.3
 
 RUN apk update && apk add --no-cache \
-    curl \
-    php \
-    php-session \
-    php-mysqli \
-    php-pdo \
-    php-pdo_mysql
+    curl php php-session php-mysqli php-pdo php-pdo_mysql
 
 WORKDIR /usr/share/adminer/
 

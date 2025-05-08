@@ -1,25 +1,29 @@
+
 services:
   nginx:
+    image: nginx
+    build: ./requirements/nginx/
+    restart: always
     depends_on:
       - wordpress
-    build: ./requirements/nginx/
     volumes:
       - wp-files:/var/www/html/:ro
-    restart: always
     ports:
       - 443:443
     networks:
       - inception_net
   mariadb:
+    image: mariadb
     build: ./requirements/mariadb/
-    volumes:
-      - db-data:/var/lib/mysql
     restart: always
     env_file: .env
+    volumes:
+      - db-data:/var/lib/mysql
     networks:
       - inception_net
 
   wordpress:
+    image: wordpress
     depends_on:
       - redis
     build: ./requirements/wordpress
@@ -31,6 +35,8 @@ services:
       - inception_net
 
   redis:
+    image: redis
+    restart: always
     networks:
       - inception_net
     depends_on:
@@ -39,6 +45,8 @@ services:
     build: ./requirements/bonus/redis-cache
 
   static:
+    image: static-website
+    restart: always
     networks:
       - inception_net
     depends_on:
@@ -46,6 +54,8 @@ services:
     build: ./requirements/bonus/static
 
   adminer:
+    image: adminer
+    restart: always
     networks:
       - inception_net
     depends_on:
@@ -53,20 +63,39 @@ services:
     build: ./requirements/bonus/adminer
 
   ftp:
+    image: ftp
+    restart: always
     networks:
       - inception_net
     ports:
+      - "20:20"
       - "21:21"
+      - "40000-40050:40000-40050"
+    build: ./requirements/bonus/ftp
     depends_on:
       - wordpress
     volumes:
-      - wp-files:/home/ftpuser/ftp
+      - wp-files:/var/www/html/
     env_file: .env
-    
+  portainer:
+    image: portainer
+    restart: always
+    build: ./requirements/bonus/portainer
+    networks:
+      - inception_net
+    depends_on:
+      - nginx
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
 
 networks:
     inception_net:
       driver: bridge
+
 
 volumes:
     db-data:
@@ -81,3 +110,5 @@ volumes:
         type: none
         device: ~/sait-alo/data/wordpress
         o: bind
+    portainer_data:
+      driver: local
