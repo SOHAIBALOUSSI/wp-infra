@@ -3,14 +3,14 @@ COMPOSE_FILE = srcs/docker-compose.yml
 
 
 install:
-	mkdir -p ~/sait-alo/data/wordpress ~/sait-alo/data/mariadb
+	sudo mkdir -p /home/sait-alo/data/wordpress /home/sait-alo/data/mariadb
 	docker compose -f $(COMPOSE_FILE) up -d --build
 
 finstall:
-	sudo rm -rf ~/sait-alo/
+	sudo rm -rf /home/sait-alo/
 	docker compose -f $(COMPOSE_FILE) down -v
 	docker compose -f $(COMPOSE_FILE) down --rmi all
-	mkdir -p ~/sait-alo/data/wordpress ~/sait-alo/data/mariadb
+	sudo mkdir -p /home/sait-alo/data/wordpress /home/sait-alo/data/mariadb
 	docker compose -f $(COMPOSE_FILE) up -d --build
 
 down:

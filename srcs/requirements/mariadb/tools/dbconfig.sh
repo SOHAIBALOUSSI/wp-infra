@@ -1,8 +1,11 @@
 #!/bin/sh
+# Ensure the socket directory exists with proper permissions
+mkdir -p /run/mysqld
+chown -R mysql:mysql /run/mysqld
 
 if [ -z "$(ls -A /var/lib/mysql)" ]; then
     echo "Initializing MariaDB data directory..."
-    mysql_install_db --user=mysql --datadir=/var/lib/mysql  
+    mysql_install_db --user=mysql --datadir=/var/lib/mysql
     echo "Creating user: ${DB_USER}"
     mariadbd --user=mysql --bootstrap <<-EOSQL
 FLUSH PRIVILEGES;

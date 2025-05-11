@@ -7,28 +7,30 @@ services:
     depends_on:
       - wordpress
     volumes:
-      - wp-files:/var/www/html/:ro
+      - WORDPRESS_VOL:/var/www/html/
+      - ./requirements/nginx/conf/certs:/etc/nginx/certs
     ports:
       - 443:443
     networks:
       - inception_net
+    
   mariadb:
     image: mariadb
     build: ./requirements/mariadb/
     restart: always
     env_file: .env
     volumes:
-      - db-data:/var/lib/mysql
+      - DB_VOL:/var/lib/mysql
     networks:
       - inception_net
 
   wordpress:
     image: wordpress
     depends_on:
-      - redis
+      - mariadb
     build: ./requirements/wordpress
     volumes:
-      - wp-files:/var/www/html/
+      - WORDPRESS_VOL:/var/www/html/
     restart: always
     env_file: .env
     networks:
@@ -65,22 +67,22 @@ services:
   ftp:
     image: ftp
     restart: always
+    env_file: .env
     networks:
       - inception_net
     ports:
-      - "20:20"
       - "21:21"
       - "40000-40050:40000-40050"
     build: ./requirements/bonus/ftp
     depends_on:
       - wordpress
     volumes:
-      - wp-files:/var/www/html/
-    env_file: .env
+      - WORDPRESS_VOL:/var/www/html/
   portainer:
     image: portainer
     restart: always
     build: ./requirements/bonus/portainer
+    env_file: .env
     networks:
       - inception_net
     depends_on:
@@ -89,8 +91,7 @@ services:
       - "9000:9000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
-
+      - PORTAINER_VOL:/data
 
 networks:
     inception_net:
@@ -98,17 +99,17 @@ networks:
 
 
 volumes:
-    db-data:
+    DB_VOL:
       driver: local
       driver_opts:
         type: none
-        device: ~/sait-alo/data/mariadb
+        device: /home/sait-alo/data/mariadb
         o: bind
-    wp-files:
+    WORDPRESS_VOL:
       driver: local
       driver_opts:
         type: none
-        device: ~/sait-alo/data/wordpress
+        device: /home/sait-alo/data/wordpress
         o: bind
-    portainer_data:
+    PORTAINER_VOL:
       driver: local

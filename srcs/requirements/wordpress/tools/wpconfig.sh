@@ -8,6 +8,8 @@ if [ ! -f wp-config.php ]; then
     rm -rf wordpress latest.tar.gz
     wp config create --dbhost="${DB_HOST}" --dbname="${DB_NAME}" \
                         --dbuser="${DB_USER}" --dbpass="${DB_PASSWORD}"
+
+    
     until wp db check ; do
         echo "Waiting for database..."
         sleep 1
@@ -21,7 +23,9 @@ if [ ! -f wp-config.php ]; then
             --admin_password="${WP_ADMIN_PASSWORD}" \
             --admin_email="${WP_ADMIN_EMAIL}" \
             --skip-email
-            
+        
+        wp user create "${WP_AUTHOR_USER}" "${WP_AUTHOR_EMAIL}" \
+        --role=author --user_pass="${WP_AUTHOR_PASSWORD}"
     fi
     wp config set WP_REDIS_HOST redis 
     wp config set WP_REDIS_PORT 6379 
