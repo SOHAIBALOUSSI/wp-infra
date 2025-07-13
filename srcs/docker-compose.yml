@@ -8,9 +8,9 @@ services:
       - wordpress
     volumes:
       - WORDPRESS_VOL:/var/www/html/
-      - ./requirements/nginx/conf/certs:/etc/nginx/certs
     ports:
-      - 443:443
+      - 9999:443
+      - 9980:80
     networks:
       - inception_net
     
@@ -36,33 +36,33 @@ services:
     networks:
       - inception_net
 
-  redis:
-    image: redis
-    restart: always
-    networks:
-      - inception_net
-    depends_on:
-      - mariadb
-    env_file: .env
-    build: ./requirements/bonus/redis-cache
+  # redis:
+    # image: redis
+    # restart: always
+    # networks:
+      # - inception_net
+    # depends_on:
+      # - mariadb
+    # env_file: .env
+    # build: ./requirements/bonus/redis-cache
 
-  static:
-    image: static-website
-    restart: always
-    networks:
-      - inception_net
-    depends_on:
-      - nginx
-    build: ./requirements/bonus/static
+  # static:
+    # image: static-website
+    # restart: always
+    # networks:
+      # - inception_net
+    # depends_on:
+      # - nginx
+    # build: ./requirements/bonus/static
 
-  adminer:
-    image: adminer
-    restart: always
-    networks:
-      - inception_net
-    depends_on:
-      - nginx
-    build: ./requirements/bonus/adminer
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   networks:
+  #     - inception_net
+  #   depends_on:
+  #     - nginx
+  #   build: ./requirements/bonus/adminer
 
   ftp:
     image: ftp
@@ -71,27 +71,27 @@ services:
     networks:
       - inception_net
     ports:
-      - "21:21"
+      - "1337:21"
       - "40000-40050:40000-40050"
     build: ./requirements/bonus/ftp
     depends_on:
       - wordpress
     volumes:
       - WORDPRESS_VOL:/var/www/html/
-  portainer:
-    image: portainer
-    restart: always
-    build: ./requirements/bonus/portainer
-    env_file: .env
-    networks:
-      - inception_net
-    depends_on:
-      - nginx
-    ports:
-      - "9000:9000"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - PORTAINER_VOL:/data
+  # portainer:
+  #   image: portainer
+  #   restart: always
+  #   build: ./requirements/bonus/portainer
+  #   env_file: .env
+  #   networks:
+  #     - inception_net
+  #   depends_on:
+  #     - nginx
+  #   ports:
+  #     - "9000:9000"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - PORTAINER_VOL:/data
 
 networks:
     inception_net:
@@ -103,13 +103,13 @@ volumes:
       driver: local
       driver_opts:
         type: none
-        device: /home/sait-alo/data/mariadb
+        device: /home/sait-alo/Desktop/wp-infra/data/mariadb
         o: bind
     WORDPRESS_VOL:
       driver: local
       driver_opts:
         type: none
-        device: /home/sait-alo/data/wordpress
+        device: /home/sait-alo/Desktop/wp-infra/data/wordpress
         o: bind
-    PORTAINER_VOL:
-      driver: local
+    # PORTAINER_VOL:
+    #   driver: local
